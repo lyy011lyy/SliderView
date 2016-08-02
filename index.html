@@ -18,7 +18,7 @@
         .slider .main,
         .slider{
             width: 100%;
-            height: 400px;
+            height: 700px;
             position: relative;
         }
 
@@ -32,7 +32,7 @@
             width: 100%;
             position: absolute;
             left: 0;
-            top: 0;
+            top: 50%;
             z-index: 1;
         }
 
@@ -122,16 +122,17 @@
 
         /*Caption move*/
         .slider .main .main-i h2{
-            margin-right: 45px;
+            margin-right: 100px;
 
         }
         .slider .main .main-i h3{
-            margin-right: -45px;
+            margin-right: -100px;
         }
         /*Add animation*/
         .slider .main .main-i h2,
         .slider .main .main-i h3{
-            -webkit-transition: all .8s .8s;
+            opacity: 0;
+            -webkit-transition: all 1s .8s;
         }
 
         .slider .main .main-i_active{
@@ -142,7 +143,10 @@
         .slider .main .main-i_active h2,
         .slider .main .main-i_active h3{
             margin-right: 0px;
+            opacity: 1;
         }
+
+        .
 
 
 
@@ -150,33 +154,113 @@
 </head>
 <body>
     <div class="slider">
-
-        <div class="main">
-            <div class="main-i">
+        <!--change view to template, add template ID-->
+        <div class="main" id="template_main">
+            <div class="main-i" id="main_{{index}}">
                 <div class="caption">
-                    <h2>h2 caption</h2>
-                    <h3>h3 caption</h3>
+                    <h2>{{h2}}</h2>
+                    <h3>{{h3}}</h3>
                 </div>
-                <img src="imgs/{{index}}.jpg" />
-            </div>
-            <div class="main-i">
-                <div class="caption">
-                    <h2>h2 caption</h2>
-                    <h3>h3 caption</h3>
-                </div>
-                <img src="imgs/{{index}}.jpg" />
+                <img src="imgs/{{index}}.jpg" class="picture" />
             </div>
         </div>
-        <div class="ctrl">
-            <a class="ctrl-i" href="javascript:;"><img src="imgs/{{index}}.jpg" /></a>
-            <a class="ctrl-i" href="javascript:;"><img src="imgs/{{index}}.jpg" /></a>
+        <div class="ctrl" id="template_ctrl">
+            <a class="ctrl-i" id="ctrl_{{index}}" href="javascript:switchSlider({{index}});"><img src="imgs/{{index}}.jpg" /></a>
         </div>
 
         <script type="text/javascript">
             // data setting
             var data = [
+                {img:1, h1:'Creative',h2:'DUET'},
+                {img:2, h1:'Friendly',h2:'DEVIL'},
+                {img:3, h1:'Tranquilent',h2:'COMPATRIOT'},
+                {img:4, h1:'Insecure',h2:'HUSSLER'},
+                {img:5, h1:'Loving',h2:'REBEL'},
+                {img:6, h1:'Passionate',h2:'SEEKER'},
+                {img:7, h1:'Crazy',h2:'FRIEND'}
+            ];
 
-            ]
+            //2.Create general function
+            var g = function (id) {
+                if (id.substr(0,1) == '.'){
+                    return document.getElementsByClassName(id.substr(1));
+                }
+                return document.getElementById(id);
+            }
+
+            //3. add slider action
+            function addSliders(){
+                //3.1 get template and delete space
+                var tpl_main = g('template_main').innerHTML
+                        .replace(/^\s*/,'')
+                        .replace(/\s*$/,'');
+                var tpl_ctrl = g('template_ctrl').innerHTML
+                        .replace(/^\s*/,'')
+                        .replace(/\s*$/,'');
+
+                // 3.2 define the final HTML variables
+                var out_main = [];
+                var out_ctrl = [];
+
+                // 3.3 traverse all data, build the final HTML output
+                for (i in data){
+                    var _html_main = tpl_main
+                            .replace(/{{index}}/g, data[i].img)
+                            .replace(/{{h2}}/g, data[i].h1)
+                            .replace(/{{h3}}/g, data[i].h2);
+                    var _html_ctrl = tpl_ctrl
+                            .replace(/{{index}}/g, data[i].img);
+
+                    out_main.push(_html_main);
+                    out_ctrl.push(_html_ctrl);
+                }
+
+                // 3.4 Write HTML back to the corresponding DOM
+                g('template_main').innerHTML = out_main.join('');
+                g('template_ctrl').innerHTML = out_ctrl.join('');
+
+            }
+
+
+            //Switch slider
+            function switchSlider(n){
+                // get sliders and control button
+                var main = g('main_'+n);
+                var ctrl = g('ctrl_'+n);
+
+                //5.2 get all sliders and ctrl buttons
+                var clear_main = g('.main-i');
+                var clear_ctrl = g('.ctrl-i');
+                // 5.3 clear all active status;
+                for (i=0; i<clear_ctrl.length; i++){
+                    clear_main[i].className = clear_main[i].className
+                            .replace(' main-i_active', '');
+                    clear_ctrl[i].className = clear_ctrl[i].className
+                            .replace(' ctrl-i_active', '');
+                }
+
+                main.className += ' main-i_active';
+                ctrl.className += ' ctrl-i_active';
+            }
+
+            //6.0 Change  margin-top to make it
+            function movePictures(){
+                var pictures = g('.picture');
+                for(i=0; i<pictures.length; i++) {
+                    pictures[i].style.marginTop =
+                            (-1 * pictures[i].clientHeight / 2) + 'px';
+                }
+            }
+
+            // 4.0 Define when to output slider
+            window.onload = function(){
+                addSliders();
+                switchSlider(2);
+                setTimeout(function(){
+                    movePictures();
+                }, 100);
+            }
+
         </script>
 
 
